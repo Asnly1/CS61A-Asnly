@@ -1,5 +1,4 @@
 # CS61A
-## This Repo
 
 This repo records my current progress in UC Berkeley's **CS61A**. 
 
