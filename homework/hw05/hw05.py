@@ -110,12 +110,15 @@ class Mint:
 
     def __init__(self):
         self.update()
+        self.year = Mint.current_year
 
     def create(self, kind):
         "*** YOUR CODE HERE ***"
+        return kind(self.year)
 
     def update(self):
         "*** YOUR CODE HERE ***"
+        self.year = Mint.current_year
 
 class Coin:
     def __init__(self, year):
@@ -123,6 +126,11 @@ class Coin:
 
     def worth(self):
         "*** YOUR CODE HERE ***"
+        if Mint.current_year - self.year > 50:
+            value = self.cents + (Mint.current_year-self.year-50)
+        else:
+            value = self.cents
+        return value
 
 class Nickel(Coin):
     cents = 5
@@ -147,6 +155,17 @@ def store_digits(n):
     >>> print("Do not use str or reversed!") if any([r in cleaned for r in ["str", "reversed"]]) else None
     """
     "*** YOUR CODE HERE ***"
+
+    fir = n % 10
+    output = Link(fir)
+    n = n // 10
+    while n > 0:
+        num = n % 10
+        output = Link(num, output)
+        n = n // 10
+    
+    return output
+
 
 
 def is_bst(t):
@@ -175,6 +194,36 @@ def is_bst(t):
     False
     """
     "*** YOUR CODE HERE ***"
+    if len(t.branches) > 2 :
+        return False
+    elif len(t.branches) == 2:
+        if bst_max(t.branches[0]) > t.label:
+            return False
+        elif bst_min(t.branches[1]) < t.label:
+            return False
+    elif len(t.branches) == 1:
+        if t.label > t.branches[0].label and bst_max(t.branches[0]) > t.label:
+            return False
+        elif t.label < t.branches[0].label and bst_min(t.branches[0]) < t.label:
+            return False
+    elif len(t.branches) == 0:
+            return True
+
+    
+    return all(is_bst(bran) for bran in t.branches)
+    
+def bst_min(t):
+    if t.is_leaf():
+        return t.label
+    else:
+        return min([t.label] + [bst_min(branch) for branch in t.branches])
+
+def bst_max(t):
+    if t.is_leaf():
+        return t.label
+    else:
+        return max([t.label] + [bst_max(branch) for branch in t.branches])
+
 
 
 def preorder(t):
@@ -188,7 +237,13 @@ def preorder(t):
     [2, 4, 6]
     """
     "*** YOUR CODE HERE ***"
+    result = [t.label]
 
+    if not t.is_leaf():
+        for branch in t.branches:
+            result += preorder(branch)
+    
+    return result
 
 def path_yielder(t, value):
     """Yields all possible paths from the root of t to a node with the label value
@@ -226,11 +281,12 @@ def path_yielder(t, value):
     """
 
     "*** YOUR CODE HERE ***"
-
-    for _______________ in _________________:
-        for _______________ in _________________:
-
-            "*** YOUR CODE HERE ***"
+    if t.label == value:
+        yield [t.label]
+    for branch in t.branches:
+        for path in path_yielder(branch, value):
+            yield [t.label] + path
+    
 
 
 class Link:
@@ -280,9 +336,9 @@ class Tree:
     >>> t = Tree(3, [Tree(2, [Tree(5)]), Tree(4)])
     >>> t.label
     3
-    >>> t.branches[0].label
+    >>> bran[0].label
     2
-    >>> t.branches[1].is_leaf()
+    >>> bran[1].is_leaf()
     True
     """
     def __init__(self, label, branches=[]):
